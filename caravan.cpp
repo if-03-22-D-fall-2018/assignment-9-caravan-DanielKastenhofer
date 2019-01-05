@@ -65,52 +65,81 @@ void add_pack_animal(Caravan caravan, PackAnimal animal)
 
   if (caravan->head == 0) {
     caravan->head = toAdd;
+    add_to_caravan(animal, caravan);
+    caravan->length++;
   }
 
   else{
-    while (current->next != 0) {
+    while (current->next != 0 && animal != current->animal) {
       current = current->next;
     }
-    current->next = toAdd;
+    if (animal == current->animal) return;
+      current->next = toAdd;
+      add_to_caravan(animal, caravan);
+      caravan->length++;
   }
-
-  add_to_caravan(animal, caravan);
-  caravan->length++;
 }
 
 void remove_pack_animal(Caravan caravan, PackAnimal animal)
 {
-  if (animal == 0) return;
-  Node current = caravan->head;
-  while (current->next != 0 && current->next->animal != animal) {
-    current = current->next;
+  if (animal != 0){
+    Node current = caravan->head;
+    Node prev;
+    if (current != 0 && current->animal == animal) {
+      caravan->head = current->next;
+      sfree(current);
+      remove_from_caravan(animal, caravan);
+      caravan->length--;
+      return;
+    }
+
+    while (current != 0 && current->animal != animal ) {
+      prev = current;
+      current=current->next;
+    }
+
+    if (current==0) return;
+      prev->next = current->next;
+      sfree(current);
+      remove_from_caravan(animal, caravan);
+      caravan->length --;
   }
-  
-  if (current->next->animal == animal) {
-    Node toRemove = current->next;
-    current->next = toRemove->next;
-    sfree(toRemove);
-    remove_from_caravan(animal, caravan);
-    caravan->length--;
-  }
-    return;
 }
 
 int get_caravan_load(Caravan caravan)
 {
-  return 0;
+  int load = 0;
+  Node current = caravan->head;
+  while (current != 0) {
+    load += get_load(current->animal);
+    current = current->next;
+  }
+  return load;
 }
 
 void unload(Caravan caravan)
 {
-
+  Node current = caravan->head;
+  while (current!=0) {
+    unload(current->animal);
+    current = current->next;
+  }
 }
 
 int get_caravan_speed(Caravan caravan)
 {
-  return 0;
+  Node current = caravan->head;
+  int lowestSpeed = get_actual_speed(current->next->animal);
+  while (current != 0) {
+    if (get_actual_speed(current->animal) < lowestSpeed) {
+      lowestSpeed = get_actual_speed(current->animal);
+    }
+    current=current->next;
+  }
+  return lowestSpeed;
 }
 
-void optimize_load(Caravan caravan){
+void optimize_load(Caravan caravan)
+{
 
 }
